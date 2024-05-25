@@ -410,7 +410,9 @@ forvalues t=0/501 {
 
 * this takes quite a long time**
 foreach id of local idlevs {
-	capture drop t_exp expsurv exphaz
+	capture drop t_exp 
+	capture drop expsurv 
+	capture drop exphaz	
 	quietly { 
 		stexpect3 using ".\data\popmort.dta" if id==`id' & dataset==1, agediag(age_accurate)  ///
 		   datediag(datediag) pmother(sex) pmage(_age)                    ///
@@ -427,6 +429,8 @@ foreach id of local idlevs {
 }
 
 gen S1_m7=. 
+gen H1_m7 =. 
+
 local j=0
 forvalues t=0(1)500 {	
 	
@@ -438,14 +442,6 @@ forvalues t=0(1)500 {
 	su ssurv_overall`t', meanonly
 	replace tplot_m7=`t'/10 in `j'
 	replace S1_m7=r(mean) in `j'
-}
-
-gen H1_m7 =. 
-local j=0
-forvalues t=0(1)500 {	
-	
-	local j=`j'+1
-	replace t=`t'/10
 	
 	predict hazard`t', timevar(t) hazard
 	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
@@ -455,6 +451,9 @@ forvalues t=0(1)500 {
 	local sums=r(sum)
 	replace tplot_m7=`t'/10 in `j'
 	replace H1_m7=`sumh'/`sums' in `j'
+	drop exp_hazid_t`t' hazard`t' haz_overall`t'
+	drop exp_survid_t`t' ssurv_overall`t' ssurv`t'
+	
 }
 
 integ S1_m7 tplot_m7 
@@ -470,7 +469,9 @@ summ Sat10mix_m7
 gen Sat5mix_m7 = S1_m7 if tplot_m7>4.98 & tplot_m7<5.02
 summ Sat5mix_m7
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop  exp_survid_t* exp_hazid_t*  
+capture drop ssurv* hazard* haz_overall*
+capture drop t ssurv expsurv exphaz
 
 * Model 8. Mixture cure (Weibull) incorporating background hazards, with age in model  
 strsmix rcsage*, link(logistic) distribution(weibull) bhazard(rate) iter(100) k1(rcsage*) k2(rcsage*)
@@ -495,7 +496,9 @@ forvalues t=0/501 {
 
 * this takes quite a long time**
 foreach id of local idlevs {
-	capture drop t_exp expsurv exphaz
+	capture drop t_exp
+	capture drop expsurv 
+	capture drop exphaz	
 	quietly { 
 		stexpect3 using ".\data\popmort.dta" if id==`id' & dataset==1, agediag(age_accurate)  ///
 		   datediag(datediag) pmother(sex) pmage(_age)                    ///
@@ -512,6 +515,8 @@ foreach id of local idlevs {
 }
 
 gen S1_m8=. 
+gen H1_m8 =. 
+
 local j=0
 forvalues t=0(1)500 {	
 	
@@ -523,14 +528,6 @@ forvalues t=0(1)500 {
 	su ssurv_overall`t', meanonly
 	replace tplot_m8=`t'/10 in `j'
 	replace S1_m8=r(mean) in `j'
-}
-
-gen H1_m8 =. 
-local j=0
-forvalues t=0(1)500 {	
-	
-	local j=`j'+1
-	replace t=`t'/10
 	
 	predict hazard`t', timevar(t) hazard
 	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
@@ -540,6 +537,9 @@ forvalues t=0(1)500 {
 	local sums=r(sum)
 	replace tplot_m8=`t'/10 in `j'
 	replace H1_m8=`sumh'/`sums' in `j'
+	drop exp_hazid_t`t' hazard`t' haz_overall`t'
+	drop exp_survid_t`t' ssurv_overall`t' ssurv`t'
+	
 }
 
 integ S1_m8 tplot_m8 
@@ -555,7 +555,12 @@ summ Sat10mix_m8
 gen Sat5mix_m8 = S1_m8 if tplot_m8>4.98 & tplot_m8<5.02
 summ Sat5mix_m8
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop  exp_survid_t* exp_hazid_t*  
+capture drop ssurv* hazard* haz_overall* 
+capture drop t ssurv*  
+capture drop hazard*
+capture drop t_exp 
+capture drop expsurv exphaz
 
 * Model 9. Non-mixture cure (FPM, 3df), SMR=2.5, 5-year boundary knot (will want to try other boundary knots), with age in model
 capture stpm2 rcsage*, tvc(rcsage*) dftvc(3) df(3) scale(h) bknots(0.01 5) bhazard(rate) cure
@@ -1279,7 +1284,9 @@ forvalues t=0/501 {
 
 * this takes quite a long time**
 foreach id of local idlevs {
-	capture drop t_exp expsurv exphaz
+	capture drop t_exp
+	capture drop expsurv 
+	capture drop exphaz
 	quietly { 
 		stexpect3 using ".\data\popmort.dta" if id==`id' & dataset==2, agediag(age_accurate)  ///
 		   datediag(datediag) pmother(sex) pmage(_age)                    ///
@@ -1297,33 +1304,35 @@ foreach id of local idlevs {
 
 gen S1_m20=. 
 local j=0
-forvalues t=0(1)500 {	
+gen H1_m20 =. 
+
+forvalues t=0(1)501 {	
 	
 	local j=`j'+1
 	replace t=`t'/10
 	
+	*survival
 	predict ssurv`t', timevar(t) surv
 	gen ssurv_overall`t'= ssurv`t'*exp_survid_t`t'
+	
+	*hazard
+	predict hazard`t', timevar(t) hazard
+	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
+	
 	su ssurv_overall`t', meanonly
 	replace tplot_m20=`t'/10 in `j'
 	replace S1_m20=r(mean) in `j'
-}
-
-gen H1_m20 =. 
-local j=0
-forvalues t=0(1)500 {	
 	
-	local j=`j'+1
-	replace t=`t'/10
-	
-	predict hazard`t', timevar(t) hazard
-	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
 	su haz_overall`t'
 	local sumh=r(sum)
 	su ssurv_overall`t'
 	local sums=r(sum)
 	replace tplot_m20=`t'/10 in `j'
 	replace H1_m20=`sumh'/`sums' in `j'
+	capture drop ssurv`t' exp_survid_t`t' ssurv_overall`t'
+	capture drop hazard`t' exp_hazid_t`t' haz_overall`t'
+	
+	
 }
 
 integ S1_m20 tplot_m20 
@@ -1339,7 +1348,9 @@ summ Sat10mix_m20
 gen Sat5mix_m20 = S1_m20 if tplot_m20>4.98 & tplot_m20<5.02
 summ Sat5mix_m20
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop  exp_survid_t* exp_hazid_t*  
+capture drop ssurv* hazard* haz_overall*
+capture drop t ssurv expsurv exphaz
 
 * Model 21. Mixture cure (Weibull) incorporating background hazards, with age in model  
 strsmix rcsage*, link(logistic) distribution(weibull) bhazard(rate) iter(100) k1(rcsage*) k2(rcsage*)
@@ -1364,7 +1375,10 @@ forvalues t=0/501 {
 
 * this takes quite a long time**
 foreach id of local idlevs {
-	capture drop t_exp expsurv exphaz
+	capture drop t_exp
+	capture drop expsurv 
+	capture drop exphaz
+
 	quietly { 
 		stexpect3 using ".\data\popmort.dta" if id==`id' & dataset==2, agediag(age_accurate)  ///
 		   datediag(datediag) pmother(sex) pmage(_age)                    ///
@@ -1423,7 +1437,9 @@ summ Sat10mix_m21
 gen Sat5mix_m21 = S1_m21 if tplot_m21>4.98 & tplot_m21<5.02
 summ Sat5mix_m21
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop  exp_survid_t* exp_hazid_t*  
+capture drop ssurv* hazard* haz_overall*
+capture drop t ssurv expsurv exphaz
 
 * Model 22. Non-mixture cure (FPM, 3df), SMR=2.5, 5-year boundary knot (will want to try other boundary knots), with age in model
 capture stpm2 rcsage*, tvc(rcsage*) dftvc(3) df(3) scale(h) bknots(0.01 5) bhazard(rate) cure
@@ -1770,6 +1786,6 @@ gen Sat5_m26 = S1_m26 if t_exp50_24>4.98 & t_exp50_24<5.02
 summ Sat5_m26
 
 ************** Save dataset for curve plots
-save "..\data\distant_models_for_plots_SMR1.dta", replace
+save ".\data\distant_models_for_plots_SMR1.dta", replace
 * now inspect which models converged
 

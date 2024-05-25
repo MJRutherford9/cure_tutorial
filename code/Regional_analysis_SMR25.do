@@ -1441,8 +1441,9 @@ summ Sat10mix_m21
 gen Sat5mix_m21 = S1_m21 if tplot_m21>4.98 & tplot_m21<5.02
 summ Sat5mix_m21
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
-
+capture drop  exp_survid_t* exp_hazid_t*  
+capture drop ssurv* hazard* haz_overall*
+capture drop t ssurv expsurv exphaz
 * Model 22. Non-mixture cure (FPM, 3df), SMR=2.5, 5-year boundary knot (will want to try other boundary knots), with age in model
 capture stpm2 rcsage*, tvc(rcsage*) dftvc(3) df(3) scale(h) bknots(0.01 5) bhazard(rate) cure
 

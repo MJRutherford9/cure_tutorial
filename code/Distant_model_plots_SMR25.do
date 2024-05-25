@@ -4,7 +4,7 @@
 
 *** Curves ***
 
-use "..\data\distant_models_for_plots_SMR25.dta", clear
+use ".\data\distant_models_for_plots_SMR25.dta", clear
 
 
 stset OS_mm if dataset==0, failure(dead) id(id) scale(12)

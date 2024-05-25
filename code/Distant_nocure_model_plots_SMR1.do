@@ -4,7 +4,7 @@
 
 *** Curves ***
 
-use "..\data\distant_nocure_models_for_plots_SMR1.dta", clear
+use ".\data\distant_nocure_models_for_plots_SMR1.dta", clear
 
 
 stset OS_mm if dataset==0, failure(dead) id(id) scale(12)
@@ -134,7 +134,7 @@ sts graph, ci plotopts(lwidth(medium) lpattern(dash))  ///
 		legend(pos(2) ring(0) cols(2)) title("", size(zero) nobox) ytitle(Proportion surviving) ytitle(, size(small)) ///
         ylabel(#8, labsize(small) angle(horizontal) format(%9.2f) nogrid) yscale(range(0 1.0)) ///
 		xtitle(Time since randomisation (years)) xtitle(, size(small)) xlabel(, labsize(small)) /// 
-        graphregion(color(white)) plotregion(fcolor(white)) name(Distant_nocure_Surv20_SMR1_24m_paper,replace)
+        graphregion(color(white)) plotregion(fcolor(white)) name(Dist_nc_Surv20_SMR1_24m_paper,replace)
 
 
 
@@ -151,7 +151,7 @@ sts graph, hazard ci plotopts(lwidth(medium) lpattern(dash)) ///
 		legend(pos(2) ring(0) cols(2)) title("", size(zero) nobox) ytitle(Hazard) ytitle(, size(small)) ///
         ylabel(#10, labsize(small) angle(horizontal) format(%9.2f) nogrid) yscale(range(0 2.0)) ///
 		xtitle(Time since randomisation (years)) xtitle(, size(small)) xlabel(, labsize(small)) /// 
-        graphregion(color(white)) plotregion(fcolor(white)) name(Distant_nocure_Haz20_SMR1_24m_paper,replace)
+        graphregion(color(white)) plotregion(fcolor(white)) name(Dist_noc_Haz20_SMR1_24m_paper,replace)
 
 
 * Models 14-26, 48-month data, 50y timeframe
@@ -182,7 +182,7 @@ sts graph, ci plotopts(lwidth(medium) lpattern(dash))  ///
 		legend(pos(2) ring(0) cols(2)) title(, size(zero) nobox) ytitle(Proportion surviving) ytitle(, size(small)) ///
         ylabel(#8, labsize(small) angle(horizontal) format(%9.2f) nogrid) yscale(range(0 1.0)) ///
 		xtitle(Time since randomisation (years)) xtitle(, size(small)) xlabel(, labsize(small)) /// 
-        graphregion(color(white)) plotregion(fcolor(white)) name(Distant_nocure_Surv50_SMR1_48m,replace)
+        graphregion(color(white)) plotregion(fcolor(white)) name(D_nc_Surv50_SMR1_48m,replace)
 
 
 
@@ -290,7 +290,7 @@ sts graph, ci plotopts(lwidth(medium) lpattern(dash))  ///
 		legend(pos(2) ring(0) cols(2)) title("", size(zero) nobox) ytitle(Proportion surviving) ytitle(, size(small)) ///
         ylabel(#8, labsize(small) angle(horizontal) format(%9.2f) nogrid) yscale(range(0 1.0)) ///
 		xtitle(Time since randomisation (years)) xtitle(, size(small)) xlabel(, labsize(small)) /// 
-        graphregion(color(white)) plotregion(fcolor(white)) name(Distant_nocure_Surv20_SMR1_48m_paper,replace)
+        graphregion(color(white)) plotregion(fcolor(white)) name(D_nc_Surv20_SMR1_48m_paper,replace)
 
 
 
@@ -307,7 +307,7 @@ sts graph, hazard ci plotopts(lwidth(medium) lpattern(dash)) ///
 		legend(pos(2) ring(0) cols(2)) title("", size(zero) nobox) ytitle(Hazard) ytitle(, size(small)) ///
         ylabel(#10, labsize(small) angle(horizontal) format(%9.2f) nogrid) yscale(range(0 2.0)) ///
 		xtitle(Time since randomisation (years)) xtitle(, size(small)) xlabel(, labsize(small)) /// 
-        graphregion(color(white)) plotregion(fcolor(white)) name(Distant_nocure_Haz20_SMR1_48m_paper,replace)
+        graphregion(color(white)) plotregion(fcolor(white)) name(Di_nc_Haz20_SMR1_48m_paper,replace)
 
 
 

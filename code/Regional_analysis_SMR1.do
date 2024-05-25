@@ -485,6 +485,8 @@ capture drop t ssurv*
 capture drop hazard*
 capture drop t_exp expsurv exphaz
 
+capture drop exp_surv* 
+
 * Model 8. Mixture cure (Weibull) incorporating background hazards, with age in model  
 
 strsmix rcsage*, link(logistic) distribution(weibull) bhazard(rate) iter(100) k1(rcsage*) k2(rcsage*)
