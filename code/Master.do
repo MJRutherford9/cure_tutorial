@@ -3,7 +3,7 @@
 *** It then calls other do files to fit the models and produce the plots contained in the paper ***************************************************************************
 ***************************************************************************************************************************************************************************
 
-**CHANGE WORKING DIRECTORY TO MAIN FOLDER FOR FILES FROM GITHUB
+**CHANGE WORKING DIRECTORY TO MAIN FOLDER WHERE THE FILES ARE DOWNLOADED FROM GITHUB
 cd ".\Files for GitHub"
 
 

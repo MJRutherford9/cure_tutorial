@@ -1380,7 +1380,10 @@ foreach id of local idlevs {
 	}
 }
 
+
 gen S1_m21=. 
+gen H1_m21 =. 
+
 local j=0
 forvalues t=0(1)500 {	
 	
@@ -1392,14 +1395,6 @@ forvalues t=0(1)500 {
 	su ssurv_overall`t', meanonly
 	replace tplot_m21=`t'/10 in `j'
 	replace S1_m21=r(mean) in `j'
-}
-
-gen H1_m21 =. 
-local j=0
-forvalues t=0(1)500 {	
-	
-	local j=`j'+1
-	replace t=`t'/10
 	
 	predict hazard`t', timevar(t) hazard
 	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
@@ -1409,7 +1404,11 @@ forvalues t=0(1)500 {
 	local sums=r(sum)
 	replace tplot_m21=`t'/10 in `j'
 	replace H1_m21=`sumh'/`sums' in `j'
+	drop exp_hazid_t`t' hazard`t' haz_overall`t'
+	drop exp_survid_t`t' ssurv_overall`t' ssurv`t'
+	
 }
+
 
 integ S1_m21 tplot_m21 
 display "RMST at 50 years: " %5.3f `r(integral)' " years"

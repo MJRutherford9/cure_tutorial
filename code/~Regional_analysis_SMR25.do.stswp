@@ -1,12 +1,11 @@
-*** Distant Analysis with SMR=2.5 ***
+*** Regional Analysis with SMR=2.5 ***
 
-* See "Deriving_distant_dataset.do" for deriving the datasets
+* See "Deriving_regional_dataset.do" for deriving the datasets
 
 * Here fit models to the 24 month data (dataset==1), and then to the 48 month data (dataset==2), and then compare them to the observed complete data (dataset==0)
 * All these are with an SMR of 2.5
 
-
-use ".\data\combined_dataset_distant.dta", clear
+use ".\data\combined_dataset_regional.dta", clear
 
 sort dataset id
 rename surv_mm OS_mm
@@ -25,9 +24,10 @@ replace _year = floor(yydx +_t) if dataset==2
 * randomisation date (number)
 gen datediag = dx
 
+
 * first get survival expectations for actual background pop (for comparison in graphs, but use the life tables with SMR applied for models)
 stset OS_mm if dataset==0, failure(dead) id(id) scale(12) 
-stexpect3 using ".\data\popmort.dta" if dataset==0, agediag(age_accurate) datediag(datediag) pmother(sex) pmage(_age) pmyear(_year) every(0.05) maxt(50) pmmaxyear(1995) pmmaxage(99)
+stexpect3 using ".\data\popmort.dta"  if dataset==0, agediag(age_accurate) datediag(datediag) pmother(sex) pmage(_age) pmyear(_year) every(0.05) maxt(50) pmmaxyear(1995) pmmaxage(99)
 rename t_exp t_exp50_b
 rename expsurv expsurv50_b
 rename  exphaz exphaz50_b
@@ -431,34 +431,37 @@ foreach id of local idlevs {
 
 gen S1_m7=. 
 local j=0
-forvalues t=0(1)500 {	
+gen H1_m7 =. 
+
+forvalues t=0(1)501 {	
 	
 	local j=`j'+1
 	replace t=`t'/10
 	
+	*survival
 	predict ssurv`t', timevar(t) surv
 	gen ssurv_overall`t'= ssurv`t'*exp_survid_t`t'
+	
+	*hazard
+	predict hazard`t', timevar(t) hazard
+	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
+	
 	su ssurv_overall`t', meanonly
 	replace tplot_m7=`t'/10 in `j'
 	replace S1_m7=r(mean) in `j'
-}
-
-gen H1_m7 =. 
-local j=0
-forvalues t=0(1)500 {	
 	
-	local j=`j'+1
-	replace t=`t'/10
-	
-	predict hazard`t', timevar(t) hazard
-	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
 	su haz_overall`t'
 	local sumh=r(sum)
 	su ssurv_overall`t'
 	local sums=r(sum)
 	replace tplot_m7=`t'/10 in `j'
 	replace H1_m7=`sumh'/`sums' in `j'
+	capture drop ssurv`t' exp_survid_t`t' ssurv_overall`t'
+	capture drop hazard`t' exp_hazid_t`t' haz_overall`t'
+	
+	
 }
+
 
 integ S1_m7 tplot_m7 
 display "RMST at 50 years: " %5.3f `r(integral)' " years"
@@ -473,7 +476,9 @@ summ Sat10mix_m7
 gen Sat5mix_m7 = S1_m7 if tplot_m7>4.98 & tplot_m7<5.02
 summ Sat5mix_m7
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop t ssurv*  
+capture drop hazard*
+capture drop t_exp expsurv exphaz
 
 * Model 8. Mixture cure (Weibull) incorporating background hazards, with age in model  
 * May not converge
@@ -517,34 +522,37 @@ foreach id of local idlevs {
 
 gen S1_m8=. 
 local j=0
-forvalues t=0(1)500 {	
+gen H1_m8 =. 
+
+forvalues t=0(1)501 {	
 	
 	local j=`j'+1
 	replace t=`t'/10
 	
+	*survival
 	predict ssurv`t', timevar(t) surv
 	gen ssurv_overall`t'= ssurv`t'*exp_survid_t`t'
+	
+	*hazard
+	predict hazard`t', timevar(t) hazard
+	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
+	
 	su ssurv_overall`t', meanonly
 	replace tplot_m8=`t'/10 in `j'
 	replace S1_m8=r(mean) in `j'
-}
-
-gen H1_m8 =. 
-local j=0
-forvalues t=0(1)500 {	
 	
-	local j=`j'+1
-	replace t=`t'/10
-	
-	predict hazard`t', timevar(t) hazard
-	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
 	su haz_overall`t'
 	local sumh=r(sum)
 	su ssurv_overall`t'
 	local sums=r(sum)
 	replace tplot_m8=`t'/10 in `j'
 	replace H1_m8=`sumh'/`sums' in `j'
+	capture drop ssurv`t' exp_survid_t`t' ssurv_overall`t'
+	capture drop hazard`t' exp_hazid_t`t' haz_overall`t'
+	
+	
 }
+
 
 integ S1_m8 tplot_m8 
 display "RMST at 50 years: " %5.3f `r(integral)' " years"
@@ -559,7 +567,9 @@ summ Sat10mix_m8
 gen Sat5mix_m8 = S1_m8 if tplot_m8>4.98 & tplot_m8<5.02
 summ Sat5mix_m8
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop t ssurv*  
+capture drop hazard*
+capture drop t_exp expsurv exphaz
 
 * Model 9. Non-mixture cure (FPM, 3df), SMR=2.5, 5-year boundary knot (will want to try other boundary knots), with age in model
 capture stpm2 rcsage*, tvc(rcsage*) dftvc(3) df(3) scale(h) bknots(0.01 5) bhazard(rate) cure
@@ -1299,35 +1309,38 @@ foreach id of local idlevs {
 	}
 }
 
+
 gen S1_m20=. 
 local j=0
-forvalues t=0(1)500 {	
+gen H1_m20 =. 
+
+forvalues t=0(1)501 {	
 	
 	local j=`j'+1
 	replace t=`t'/10
 	
+	*survival
 	predict ssurv`t', timevar(t) surv
 	gen ssurv_overall`t'= ssurv`t'*exp_survid_t`t'
+	
+	*hazard
+	predict hazard`t', timevar(t) hazard
+	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
+	
 	su ssurv_overall`t', meanonly
 	replace tplot_m20=`t'/10 in `j'
 	replace S1_m20=r(mean) in `j'
-}
-
-gen H1_m20 =. 
-local j=0
-forvalues t=0(1)500 {	
 	
-	local j=`j'+1
-	replace t=`t'/10
-	
-	predict hazard`t', timevar(t) hazard
-	gen haz_overall`t'= ssurv_overall`t'*(hazard`t' + exp_hazid_t`t')
 	su haz_overall`t'
 	local sumh=r(sum)
 	su ssurv_overall`t'
 	local sums=r(sum)
 	replace tplot_m20=`t'/10 in `j'
 	replace H1_m20=`sumh'/`sums' in `j'
+	capture drop ssurv`t' exp_survid_t`t' ssurv_overall`t'
+	capture drop hazard`t' exp_hazid_t`t' haz_overall`t'
+	
+	
 }
 
 integ S1_m20 tplot_m20 
@@ -1343,7 +1356,9 @@ summ Sat10mix_m20
 gen Sat5mix_m20 = S1_m20 if tplot_m20>4.98 & tplot_m20<5.02
 summ Sat5mix_m20
 
-drop t ssurv exp_survid_t* exp_hazid_t* ssurv* hazard* haz_overall* t_exp expsurv exphaz
+capture drop t ssurv*  
+capture drop hazard*
+capture drop t_exp expsurv exphaz
 
 * Model 21. Mixture cure (Weibull) incorporating background hazards, with age in model  
 strsmix rcsage*, link(logistic) distribution(weibull) bhazard(rate) iter(100) k1(rcsage*) k2(rcsage*)
@@ -1408,7 +1423,7 @@ forvalues t=0(1)500 {
 	replace tplot_m21=`t'/10 in `j'
 	replace H1_m21=`sumh'/`sums' in `j'
 	drop exp_hazid_t`t' hazard`t' haz_overall`t'
-	drop exp_survid_t`t' ssurv_overall`t' ssurv`t'
+	drop exp_survid_t`t' ssurv_overall`t'
 	
 }
 
@@ -1772,7 +1787,7 @@ summ Sat10_m26
 gen Sat5_m26 = S1_m26 if t_exp50_24>4.98 & t_exp50_24<5.02
 summ Sat5_m26
 
-************** Save dataset for curve plots
-save "..\data\distant_models_for_plots_SMR25.dta", replace
 
+save ".\data\regional_models_for_plots_SMR25.dta", replace
 * now inspect which models converged
+
